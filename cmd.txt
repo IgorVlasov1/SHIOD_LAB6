@@ -1,0 +1,33 @@
+echo. > Dockerfile. 
+echo . > init.sql 
+
+============
+DockerFile.
+FROM postgres:latest
+ENV POSTGRES_PASSWORD=dbpass
+ENV POSTGRES_USER=dbuser
+ENV POSTGRES_DB=dbname
+VOLUME /d_data:/var/lib/postgresql/data
+COPY init_scripts/init.sql /docker-entrypoint-initdb.d/init
+============
+
+============
+/init_scripts/init.sql
+
+CREATE TABLE IF NOT EXISTS public.index_mass (
+    user_id BIGINT,
+    weight BIGINT,
+    height BIGINT
+);
+INSERT INTO public.index_mass (user_id, weight, height) VALUES
+    (1, 75, 175),
+    (2, 60, 182),
+    (3, 93, 181);
+==========
+docker build -t d_img:latest
+docker run -d -p 5432:5432 --name d_cont_new -v /d_data:/var/lib/postgresql/data d_img:latest
+docker exec -it d_cont psql -d -U usr dbn
+
+Для удаления и остановки
+docker stop d_cont
+docker rm d_cont
